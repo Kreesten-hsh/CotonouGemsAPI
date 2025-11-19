@@ -40,5 +40,7 @@ const connectDB = async () => {
     }
 };
 
-// --- 5. EXECUTION ---
+// --- 5. ROUTES ---
+app.use('/api/etablissements', require('./routes/etablissements'));
+
 connectDB();
