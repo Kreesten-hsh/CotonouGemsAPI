@@ -2,45 +2,34 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const cors = require('cors'); // Essentiel pour la connexion depuis Flutter
+const cors = require('cors');
 
-// --- 1. CONFIGURATION INITIALE ---
-// Charge les variables du fichier .env dans process.env
+// Charger les variables du .env
 dotenv.config();
 
 const app = express();
 
-// --- 2. MIDDLEWARES ---
-// Permet de traiter les données JSON envoyées par les clients (Flutter)
+// Middlewares
 app.use(express.json()); 
+app.use(cors()); // Permet à Flutter de communiquer avec l'API
 
-// Permet aux requêtes de Flutter d'accéder à l'API (très important en développement)
-app.use(cors()); 
+// Définition de la route pour les établissements
+app.use('/api/etablissements', require('./routes/etablissements'));
 
-// --- 3. CONNEXION À LA BASE DE DONNÉES ---
+// Connexion à la base de données
 const connectDB = async () => {
     try {
-        // Mongoose utilise MONGO_URI pour se connecter à Atlas
-        await mongoose.connect(process.env.MONGO_URI, {
-            // Options de connexion recommandées (déjà incluses dans l'URI générée, mais bonnes à savoir)
-            // useNewUrlParser: true, 
-            // useUnifiedTopology: true,
-        });
-
+        await mongoose.connect(process.env.MONGO_URI);
         console.log('✅ MongoDB Atlas connecté avec succès !');
         
-        // --- 4. DÉMARRAGE DU SERVEUR EXPRESS ---
+        // Démarrer le serveur Express
         const PORT = process.env.PORT || 5000;
         app.listen(PORT, () => console.log(`🚀 Serveur Express démarré sur le port ${PORT}`));
 
     } catch (err) {
-        // En cas d'échec (mauvais mot de passe, mauvaise IP, etc.)
         console.error('❌ Erreur de connexion à la base de données :', err.message);
-        process.exit(1); // Quitter le processus pour indiquer une erreur fatale
+        process.exit(1);
     }
 };
-
-// --- 5. ROUTES ---
-app.use('/api/etablissements', require('./routes/etablissements'));
 
 connectDB();
